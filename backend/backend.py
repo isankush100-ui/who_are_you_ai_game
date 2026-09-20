@@ -502,8 +502,32 @@ PERSON'S ANSWERS:
             break
         except Exception as e:
             error_text = str(e)
+            status_code = getattr(e, "status_code", None)
+            is_quota_error = (
+                (status_code == 429 or "429" in error_text)
+                and (
+                    "RESOURCE_EXHAUSTED" in error_text.upper()
+                    or "QUOTA EXCEEDED" in error_text.upper()
+                    or "QUOTA EXHAUSTED" in error_text.upper()
+                )
+            )
 
-            if "503" not in error_text and "UNAVAILABLE" not in error_text:
+            if is_quota_error:
+                raise HTTPException(
+                    status_code=429,
+                    detail=(
+                        "AI analysis is temporarily unavailable because the "
+                        "Gemini API quota has been reached. Please try again later."
+                    )
+                )
+
+            is_temporary_unavailable = (
+                status_code == 503
+                or "503" in error_text
+                or "UNAVAILABLE" in error_text.upper()
+            )
+
+            if not is_temporary_unavailable:
                 raise HTTPException(
                     status_code=500,
                     detail=f"AI analysis failed: {e}"

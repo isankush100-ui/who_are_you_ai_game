@@ -19,6 +19,7 @@ from openai import OpenAI
 
 from database import get_db, engine, Base
 from backend.models import Character, GameResult
+from sqlalchemy import text
 
 
 # ============================================================
@@ -1556,6 +1557,23 @@ async def analyze(
             "candidates": [characters]
         }
     }
+
+
+@app.get("/api/reset-stats")
+def reset_stats():
+    db = next(get_db())
+
+    try:
+        db.execute(
+            text(
+                "TRUNCATE TABLE game_results, characters "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
+        db.commit()
+        return {"message": "Stats reset successfully"}
+    finally:
+        db.close()
 
 # ============================================================
 # STREAMING ANALYZE API

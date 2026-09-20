@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from database import get_db
+from database import get_db, engine, Base
 from backend.models import Character, GameResult
 
 
@@ -38,6 +38,7 @@ load_dotenv()
 
 app = FastAPI(title="Who Are You? AI Character Game")
 
+Base.metadata.create_all(bind=engine)
 
 # ============================================================
 # GEMINI

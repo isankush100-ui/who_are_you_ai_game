@@ -10,6 +10,7 @@ import asyncio
 import os
 import json
 import re
+import time
 
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -478,26 +479,50 @@ PERSON'S ANSWERS:
 {user_answers}
 """
 
-    try:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a semantic personality analysis engine. "
-                        "Return only valid JSON."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.2,
-            reasoning_effort="low"
-        )
+    for attempt in range(1, 5):
+        try:
+            response = client.chat.completions.create(
+                model=MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a semantic personality analysis engine. "
+                            "Return only valid JSON."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.2,
+                reasoning_effort="low"
+            )
+            break
+        except Exception as e:
+            error_text = str(e)
 
+            if "503" not in error_text and "UNAVAILABLE" not in error_text:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"AI analysis failed: {e}"
+                )
+
+            if attempt == 4:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"AI analysis failed: {e}"
+                )
+
+            delay = 2 ** (attempt - 1)
+            print(
+                f"[GEMINI RETRY] Attempt {attempt} failed. "
+                f"Retrying in {delay} seconds..."
+            )
+            time.sleep(delay)
+
+    try:
         text = response.choices[0].message.content or ""
 
         data = clean_json(text)

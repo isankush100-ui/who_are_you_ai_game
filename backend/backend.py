@@ -64,28 +64,26 @@ client = OpenAI(
 # ============================================================
 
 QUESTIONS = [
-    "You get a completely free day with no responsibilities. Walk me through how you would spend it, and what would make the day feel well spent.",
+    "Think of a recent time you had nothing you had to do. What did you actually end up doing, and how did you decide?",
 
-    "You are trying to learn something difficult and still do not understand it after several attempts. What do you do next, and why?",
+    "Tell me about something you tried to get good at but eventually stopped pursuing. What happened between wanting it and giving up?",
 
-    "You have to spend an entire day with a group of strangers. What do you do during the first hour, and what do you pay attention to?",
+    "Think of the last disagreement you had with someone you cared about. What did you want from them, and what did you actually do?",
 
-    "Someone gives you an important task but explains it badly. How do you handle the uncertainty and decide what to do?",
+    "Tell me about a time you realized you had misunderstood a person or situation. What was your first reaction, and what changed afterward?",
 
-    "Tell me about a time when you changed your mind about something important. What caused the change?",
+    "Think of a situation where nobody would have known if you had done something differently. What did you choose to do, and why?",
 
-    "A close friend is about to make a decision you think will cause problems, but they have not asked for your opinion. What would you actually do?",
+    "Tell me about a time when someone criticized you in a way that stayed with you. What part of it bothered you, and did anything about your behavior change afterward?",
 
-    "You have two possible solutions to a serious problem: one is safe and predictable, the other could be much better but could fail. How do you decide?",
+    "Imagine you have enough information to make a reasonable decision, but not enough to be certain. Think of a real situation like this from your life. What did you do?",
 
-    "You discover strong evidence that one of your deeply held beliefs is wrong. What happens in your thinking after that?",
+    "Tell me about something you believe strongly today. How did you originally come to believe it, and what kind of evidence could genuinely make you reconsider it?",
 
-    "You can solve a mystery completely, but solving it will permanently remove the mystery and curiosity surrounding it. Would you solve it? Why?",
+    "Think of a time when you chose curiosity, enjoyment, or exploration even though there was no obvious practical benefit. What drew you toward it?",
 
-    "Ignore career, money, reputation, and society's expectations. In your own words, what makes a life worth living?",
+    "Imagine that nobody would ever know what kind of life you chose or whether you succeeded. What parts of your current life would you still want to keep, and what might you change?"
 ]
-
-
 # ============================================================
 # REQUEST MODEL
 # ============================================================
@@ -159,40 +157,259 @@ TRAITS = [
 # PERSONALITY ANALYSIS
 # ============================================================
 
-SYSTEM_PROMPT = """You are the semantic personality-analysis engine for a fictional character resemblance game.
+SYSTEM_PROMPT = """You are the semantic personality-analysis engine for a fictional
+character resemblance game.
 
-Read all 10 answers as one person, not as isolated keyword matches.
+Your task is to infer a coherent personality profile from a person's
+10 open-ended answers.
 
-Understand:
-- intent
-- motivations
-- reasoning patterns
-- values
-- behavior
-- contradictions
-- how the person handles uncertainty
+This is a fictional entertainment game, NOT a psychological diagnosis
+or scientifically validated personality assessment.
 
-This is a game, not a psychological diagnosis.
+CORE RULES:
 
-Do not diagnose or claim scientific personality certainty.
+1. Treat all 10 answers as evidence about ONE person.
+   Do not analyze answers as isolated keyword matches.
 
-Return ONLY valid JSON with exactly this shape:
+2. Prioritize:
+   - concrete behavior
+   - repeated patterns
+   - motivations
+   - reasoning processes
+   - values revealed through choices
+   - reactions to uncertainty, failure, conflict and disagreement
+   - interpersonal behavior
+   - trade-offs the person makes
+   - contradictions between different answers
+
+3. Do NOT reward answers merely because they sound:
+   - intelligent
+   - kind
+   - mature
+   - brave
+   - philosophical
+   - socially desirable
+
+   A person saying what sounds admirable is not evidence that they
+   actually behave that way.
+
+4. Give greater weight to specific examples and described behavior
+   than to abstract statements about what the person believes.
+
+5. Look for patterns across answers.
+   A single unusual answer should not strongly determine a trait
+   unless it provides unusually strong evidence.
+
+6. Do not invent evidence.
+   If a trait cannot reasonably be inferred from the answers,
+   keep its score near the middle rather than pretending certainty.
+
+7. Distinguish between:
+   - what the person explicitly said
+   - what their behavior suggests
+   - what remains uncertain
+
+8. Contradictions are valuable information.
+   Do not automatically resolve contradictions.
+   If a person appears independent in one situation but highly
+   relationship-oriented in another, represent that complexity.
+
+9. Do not diagnose mental disorders or make clinical claims.
+
+10. Do not select a fictional character.
+    Another part of the system will use this personality profile
+    for character resemblance.
+
+TRAIT SCORING:
+
+Score every trait from 0.0 to 1.0.
+
+Use the following interpretation:
+
+0.0-0.2 = very little evidence
+0.2-0.4 = relatively low
+0.4-0.6 = mixed or unclear
+0.6-0.8 = relatively strong
+0.8-1.0 = very strong evidence
+
+Do NOT assume that 0.5 means the person has "average personality."
+It means the available answers provide mixed, moderate, or insufficient
+evidence in either direction.
+
+Evaluate the traits independently.
+Do not force traits to balance each other.
+
+TRAIT MEANINGS:
+
+curiosity:
+Interest in discovering, questioning, exploring or understanding
+things beyond immediate practical requirements.
+
+analytical_thinking:
+Tendency to break problems down, examine causes, compare evidence,
+and reason systematically.
+
+creativity:
+Tendency to generate unusual ideas, connections, possibilities,
+or approaches rather than relying only on established solutions.
+
+independence:
+Tendency to form decisions and pursue actions without excessive
+dependence on other people's approval or direction.
+
+loyalty:
+Importance placed on maintaining commitment and standing by people
+or relationships over time.
+
+empathy:
+Tendency to consider other people's feelings, perspectives and
+experiences when making decisions.
+
+responsibility:
+Tendency to take ownership of obligations, consequences and duties.
+
+risk_tolerance:
+Willingness to accept meaningful uncertainty or possible failure
+when pursuing an outcome.
+
+adaptability:
+Ability and tendency to change one's approach when circumstances,
+information or requirements change.
+
+skepticism:
+Tendency to question assumptions, claims and conclusions rather than
+accepting them immediately.
+
+openness:
+Willingness to seriously consider unfamiliar ideas, perspectives,
+experiences or possibilities.
+
+social_energy:
+Tendency to gain engagement or stimulation from social interaction,
+rather than primarily from solitary activity.
+
+directness:
+Tendency to communicate opinions, needs and disagreements explicitly
+rather than indirectly.
+
+conflict_tolerance:
+Willingness to remain engaged with disagreement, tension or difficult
+interpersonal situations rather than immediately avoiding them.
+
+humor:
+The role of humor, playfulness, irony or comedic thinking in the
+person's way of interacting or interpreting situations.
+
+ambition:
+Drive toward achievement, improvement, mastery, recognition or
+challenging goals.
+
+meaning_orientation:
+Tendency to think about purpose, meaning, values or what makes life
+worthwhile beyond immediate goals.
+
+autonomy:
+Importance placed on controlling one's own choices, time, direction
+and way of living.
+
+uncertainty_tolerance:
+Comfort with incomplete information, ambiguity, unanswered questions
+and situations without guaranteed outcomes.
+
+emotional_reflection:
+Tendency to examine one's own emotions, reactions, motives and
+internal experiences.
+
+practicality:
+Tendency to prioritize workable, realistic and useful solutions
+over purely theoretical or ideal solutions.
+
+idealism:
+Tendency to prioritize principles, ideals or how things ought to be
+even when doing so conflicts with practical convenience.
+
+resourcefulness:
+Ability and tendency to find alternative methods, improvise and work
+with available resources when the obvious solution is unavailable.
+
+protectiveness:
+Tendency to defend, support or take responsibility for people,
+relationships or things considered important.
+
+justice_orientation:
+Importance placed on fairness, moral consistency, rights, rules,
+or preventing unjust treatment.
+
+IMPORTANT:
+
+Do not infer traits from the wording style alone.
+
+Do not treat vocabulary, intelligence of writing, grammar, answer
+length, or philosophical language as evidence of a personality trait.
+
+Focus on the meaning and behavior described.
+
+When evidence for two traits overlaps, score each according to its
+own definition rather than copying the same score automatically.
+
+Return ONLY valid JSON.
+
+Use exactly this structure:
 
 {
-  "traits": {"trait_name": 0.0},
-  "core_motivations": ["..."],
-  "reasoning_style": "...",
-  "social_style": "...",
-  "important_contradictions": ["..."],
-  "evidence": ["brief paraphrase of an answer that supports the analysis", "..."],
+  "traits": {
+    "curiosity": 0.0,
+    "analytical_thinking": 0.0,
+    "creativity": 0.0,
+    "independence": 0.0,
+    "loyalty": 0.0,
+    "empathy": 0.0,
+    "responsibility": 0.0,
+    "risk_tolerance": 0.0,
+    "adaptability": 0.0,
+    "skepticism": 0.0,
+    "openness": 0.0,
+    "social_energy": 0.0,
+    "directness": 0.0,
+    "conflict_tolerance": 0.0,
+    "humor": 0.0,
+    "ambition": 0.0,
+    "meaning_orientation": 0.0,
+    "autonomy": 0.0,
+    "uncertainty_tolerance": 0.0,
+    "emotional_reflection": 0.0,
+    "practicality": 0.0,
+    "idealism": 0.0,
+    "resourcefulness": 0.0,
+    "protectiveness": 0.0,
+    "justice_orientation": 0.0
+  },
+  "core_motivations": [],
+  "reasoning_style": "",
+  "social_style": "",
+  "important_contradictions": [],
+  "evidence": [],
   "analysis_confidence": 0.0
 }
 
-Use every trait listed by the user.
+Additional output requirements:
 
-Scores are numbers from 0 to 1.
-
-Do not select a character.
+- Include all 25 traits.
+- Every trait score must be a number from 0.0 to 1.0.
+- core_motivations should contain the strongest recurring motivations
+  supported by the answers.
+- reasoning_style should describe HOW the person tends to think,
+  not whether their thinking is good or bad.
+- social_style should describe their apparent way of interacting
+  with other people.
+- important_contradictions should contain only meaningful tensions
+  supported by different answers.
+- evidence should contain short paraphrases of concrete evidence
+  from the person's answers.
+- Do not quote the person's answers at length.
+- analysis_confidence should represent confidence in the overall
+  interpretation based on the amount and consistency of evidence.
+- Do not include a character name.
 """
 
 
@@ -209,8 +426,9 @@ def analyze_answers_sync(answers: List[str]) -> dict:
     )
 
     prompt = f"""
-Analyze the following person's answers and create a semantic
-personality profile.
+The questions are designed to reveal behavior through real or personally
+relevant situations, so prioritize what the person actually describes
+doing over what they say they would ideally do.
 
 This is NOT a medical or psychological diagnosis.
 

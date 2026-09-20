@@ -1,8 +1,7 @@
 import os
-
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -11,7 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
 
-# Use Psycopg 3
+# Force SQLAlchemy to use Psycopg 3
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace(
         "postgresql://",
@@ -19,7 +18,7 @@ if DATABASE_URL.startswith("postgresql://"):
         1
     )
 
-if DATABASE_URL.startswith("postgres://"):
+elif DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace(
         "postgres://",
         "postgresql+psycopg://",
@@ -32,13 +31,12 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(
-    bind=engine,
+    autocommit=False,
     autoflush=False,
-    autocommit=False
+    bind=engine
 )
 
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()
